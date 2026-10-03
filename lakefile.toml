@@ -1,0 +1,11 @@
+name = "LeanDecisionTheory"
+defaultTargets = ["LeanDecisionTheory"]
+testDriver = "LeanDecisionTheory"
+
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"
+rev = "282fbb865d53622ef7f9ef29f6763a0327ee6b5f"
+
+[[lean_lib]]
+name = "LeanDecisionTheory"
