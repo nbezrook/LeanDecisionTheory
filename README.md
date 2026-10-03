@@ -7,13 +7,23 @@ Epistemic work done via A. Perea, *Epistemic Game Theory: Reasoning and Choice* 
 2012), section by section. Perea works with finite epistemic models (Definition 3.3.1) rather
 than universal type spaces, so assume finite probability with and no measures per se. (thank you Andrés for the headache medicine)
 
+Epistemic game theory in Lean is not virgin ground — `elazarg/GameTheory` has partition-based
+knowledge and common knowledge with the S5 axioms, Aumann agreement, and both correlated and
+independent rationalizability. What is not formalised anywhere is Perea's own ladder built on
+finite epistemic models: common belief in rationality and the refinements of it that occupy the
+rest of his book.
+
 Mathlib has no decision theory in the preference-axiomatic sense. It has no lotteries, no
 preference relations, no expected-utility representation, no capacities and no Choquet
 integral. What it has is `Mathlib/Probability/Decision/`, which is Wald-style
-*statistical* decision theory — risk, Bayes risk, `minimaxRisk` — a different subject. The one
-formalisation of the von Neumann–Morgenstern theorem in the literature is a standalone paper,
-not a library. So the representation theorems that every applied model quietly invokes have
-never been machine-checked in a form anyone can import.
+*statistical* decision theory — risk, Bayes risk, `minimaxRisk` — a different subject.
+
+Outside Mathlib the picture under *risk* is better than it looks: EconCSLib has lotteries and
+the four vNM axioms with their independence proved, and there is a standalone paper on the vNM
+representation theorem ([arXiv:2506.07066](https://arxiv.org/abs/2506.07066)). What is missing
+from every library is the vNM *representation theorem* itself, and everything under
+**ambiguity** — capacities, the Choquet integral, maxmin expected utility over a set of priors,
+variational preferences. That is the gap this repo is aimed at.
 
 starting with foundations: **Gilboa–Schmeidler maxmin representation**
 
@@ -105,9 +115,13 @@ the status table above has open entries, and it is the only warning the build sh
 ## Related work
 
 - [EconCSLib](https://github.com/gametheoryinlean/EconCSLib) — strategic, extensive and
-  coalitional games, social choice, fair division, matching, auctions, mechanism design. This
-  repository deliberately sits *below* it: preferences and beliefs rather than solution
-  concepts. Interoperability is a goal, duplication is not.
+  coalitional games, social choice, fair division, matching, auctions, mechanism design, and in
+  `Foundation/Utility/` lotteries and the vNM axioms. Its `Math/` has Farkas, strong LP duality
+  and the simplex, which is the separation machinery this repo also needs. Interoperability is
+  a goal, duplication is not.
+- [elazarg/GameTheory](https://github.com/elazarg/GameTheory) — the closest overlap:
+  `Epistemic/` (knowledge, common knowledge, agreement) and `Core/Rationalizability.lean`.
+  Worth reading before formalising anything in the same territory.
 - [LeanEconomics](https://github.com/LeanEconomics/LeanEconomics) — recursive macroeconomics
   and the algorithms that solve quantitative models.
 - [AgreeToDisagree](https://github.com/AxiomMath/AgreeToDisagree) — Aumann's agreement theorem,
