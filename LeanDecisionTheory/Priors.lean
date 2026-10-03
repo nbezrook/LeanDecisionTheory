@@ -80,6 +80,17 @@ theorem expect_smul (t : ℝ) (p a : S → ℝ) : expect p (t • a) = t * expec
   simp only [expect, Pi.smul_apply, smul_eq_mul, Finset.mul_sum]
   exact Finset.sum_congr rfl fun s _ => by ring
 
+@[simp]
+theorem expect_one (p : S → ℝ) : expect p 1 = ∑ s, p s := by
+  simp [expect]
+
+/-- expectation of a point mass reads off coordinate -/
+@[simp]
+theorem expect_single [DecidableEq S] (p : S → ℝ) (s : S) :
+    expect p (Pi.single s 1) = p s := by
+  simp only [expect, Pi.single_apply, mul_ite, mul_one, mul_zero]
+  simp
+
 theorem expect_mono {p : S → ℝ} (hp : p ∈ Priors S) {a b : S → ℝ} (hab : a ≤ b) :
     expect p a ≤ expect p b :=
   Finset.sum_le_sum fun s _ => mul_le_mul_of_nonneg_left (hab s) (hp.1 s)

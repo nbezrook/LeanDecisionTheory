@@ -48,18 +48,72 @@ namespace DecisionTheory
 
 variable {S : Type*} [Fintype S] {I : (S → ℝ) → ℝ}
 
-theorem isLeast_expect_core [Nonempty S] (hI : IsConcaveNiveloid I) (a : S → ℝ) :
-    IsLeast ((fun p => expect p a) '' core I) (I a) :=
-  sorry -- TODO: lower bound is `mem_core_iff`; attainment needs a supergradient of `I` at `a`
+/-- a function dominating `I` pointwise is automatically a prior -/
+theorem mem_priors_of_dominates (hI : IsConcaveNiveloid I) {p : S → ℝ}
+    (hdom : ∀ x, I x ≤ expect p x) : p ∈ Priors S := by
+  classical
+  refine ⟨fun s => ?_, ?_⟩
+  · have h0 : (0 : S → ℝ) ≤ Pi.single s 1 := by
+      intro t
+      rcases eq_or_ne t s with rfl | h
+      · simp
+      · simp [h]
+    calc (0 : ℝ) = I 0 := hI.map_zero.symm
+      _ ≤ I (Pi.single s 1) := hI.mono h0
+      _ ≤ expect p (Pi.single s 1) := hdom _
+      _ = p s := expect_single p s
+  · have hge : (1 : ℝ) ≤ ∑ s, p s := by
+      have h := hdom 1
+      rwa [hI.normalized, expect_one] at h
+    have hle : ∑ s, p s ≤ 1 := by
+      have h := hdom (fun _ => (-1 : ℝ))
+      rw [hI.map_const] at h
+      have hneg : expect p (fun _ => (-1 : ℝ)) = -∑ s, p s := by
+        simp only [expect, mul_neg, mul_one, Finset.sum_neg_distrib]
+      rw [hneg] at h
+      linarith
+    linarith
 
-theorem eq_sInf_expect_core [Nonempty S] (hI : IsConcaveNiveloid I) (a : S → ℝ) :
+/-- concave niveloid has supergradient at every point -/
+theorem exists_supergradient (hI : IsConcaveNiveloid I) (a : S → ℝ) :
+    ∃ p : S → ℝ, (∀ x, I x ≤ expect p x) ∧ expect p a = I a :=
+  sorry -- TODO: separate `(a, I a)` from the hypograph `{(x, t) | t ≤ I x}` in `(S → ℝ) × ℝ`.
+        -- Convex by `hI.concave`, closed because `hI.le_add_const` makes `I` nonexpansive. The
+        -- separating functional's last coordinate is strictly negative (the hypograph is
+        -- unbounded downwards), so rescaling gives `q` with `I x ≤ I a + expect q (x - a)`.
+        -- Then `x := 0` and `x := 2 • a` with `hI.posHom` force `expect q a = I a`.
+
+theorem isLeast_expect_core_of_supergradient (hI : IsConcaveNiveloid I) {a p : S → ℝ}
+    (hdom : ∀ x, I x ≤ expect p x) (heq : expect p a = I a) :
+    IsLeast ((fun q => expect q a) '' core I) (I a) := by
+  refine ⟨⟨p, ⟨mem_priors_of_dominates hI hdom, hdom⟩, heq⟩, ?_⟩
+  rintro _ ⟨q, hq, rfl⟩
+  exact hq.2 a
+
+theorem isLeast_expect_core (hI : IsConcaveNiveloid I) (a : S → ℝ) :
+    IsLeast ((fun p => expect p a) '' core I) (I a) :=
+  let ⟨_p, hdom, heq⟩ := exists_supergradient hI a
+  isLeast_expect_core_of_supergradient hI hdom heq
+
+theorem core_nonempty (hI : IsConcaveNiveloid I) : (core I).Nonempty :=
+  let ⟨p, hdom, _⟩ := exists_supergradient hI 1
+  ⟨p, mem_priors_of_dominates hI hdom, hdom⟩
+
+theorem eq_sInf_expect_core (hI : IsConcaveNiveloid I) (a : S → ℝ) :
     I a = sInf ((fun p => expect p a) '' core I) :=
   ((isLeast_expect_core hI a).csInf_eq).symm
 
-theorem core_eq_of_isLeast [Nonempty S] (hI : IsConcaveNiveloid I) {C : Set (S → ℝ)}
+theorem subset_core_of_isLeast {C : Set (S → ℝ)} (hC : C ⊆ Priors S)
+    (hrep : ∀ a, IsLeast ((fun p => expect p a) '' C) (I a)) : C ⊆ core I :=
+  fun p hp => ⟨hC hp, fun a => (hrep a).2 ⟨p, hp, rfl⟩⟩
+
+theorem core_eq_of_isLeast (hI : IsConcaveNiveloid I) {C : Set (S → ℝ)}
     (hC : C ⊆ Priors S) (hconv : Convex ℝ C) (hclosed : IsClosed C)
     (hrep : ∀ a, IsLeast ((fun p => expect p a) '' C) (I a)) : C = core I :=
-  sorry -- TODO: both inclusions by separation; `hrep` gives `C ⊆ core I` directly
+  sorry -- TODO: `subset_core_of_isLeast` gives `C ⊆ core I`. For the reverse, separate a
+        -- `p ∈ core I \ C` from the compact convex `C` to get a direction `a` with
+        -- `expect p a < expect q a` for all `q ∈ C`, hence `expect p a < I a`, contradicting
+        -- `p ∈ core I`.
 
 theorem IsConcaveNiveloid.of_isLeast_expect {C : Set (S → ℝ)} (hC : C ⊆ Priors S)
     (hrep : ∀ a, IsLeast ((fun p => expect p a) '' C) (I a)) :

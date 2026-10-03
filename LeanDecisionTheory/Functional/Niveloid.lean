@@ -75,6 +75,10 @@ theorem map_const (c : ℝ) : I (fun _ => c) = c := by
   rwa [zero_add, hI.map_zero, zero_add] at h
 
 omit [Fintype S] in
+theorem le_add_const {a b : S → ℝ} {c : ℝ} (hab : a ≤ b + fun _ => c) : I a ≤ I b + c :=
+  (hI.mono hab).trans_eq (hI.constAdd b c)
+
+omit [Fintype S] in
 theorem concave : ∀ (a b : S → ℝ) {s t : ℝ}, 0 ≤ s → 0 ≤ t → s + t = 1 →
     s * I a + t * I b ≤ I (s • a + t • b) := by
   intro a b s t hs ht _
