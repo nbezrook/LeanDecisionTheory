@@ -3,6 +3,10 @@
 project to formalize decision theory under risk and ambiguity, and the epistemic foundations of game theory,
 in Lean 4 via Mathlib.
 
+Epistemic work done via A. Perea, *Epistemic Game Theory: Reasoning and Choice* (Cambridge,
+2012), section by section. Perea works with finite epistemic models (Definition 3.3.1) rather
+than universal type spaces, so assume finite probability with and no measures per se. (thank you Andrés for the headache medicine)
+
 Mathlib has no decision theory in the preference-axiomatic sense. It has no lotteries, no
 preference relations, no expected-utility representation, no capacities and no Choquet
 integral. What it has is `Mathlib/Probability/Decision/`, which is Wald-style
