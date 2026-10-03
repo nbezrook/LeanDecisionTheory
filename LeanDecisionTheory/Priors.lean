@@ -12,7 +12,7 @@ public import Mathlib.Topology.Instances.Real.Lemmas
 /-!
 # Priors on a finite state space
 
-A *prior* on a finite state space `S` is a probability vector: a nonnegative function
+*prior* on a finite state space `S` is a probability vector: a nonnegative function
 `p : S → ℝ` summing to one. `Priors S` is the set of them.
 
 This is the standard simplex. Mathlib has it twice over: `stdSimplex 𝕜 ι`, deprecated since
@@ -91,9 +91,33 @@ theorem expect_single [DecidableEq S] (p : S → ℝ) (s : S) :
   simp only [expect, Pi.single_apply, mul_ite, mul_one, mul_zero]
   simp
 
+/-- Dirac delta distribution. expectation under a point mass is evaluation-/
+@[simp]
+theorem expect_dirac [DecidableEq S] (s : S) (a : S → ℝ) :
+    expect (Pi.single s 1) a = a s := by
+  simp only [expect, Pi.single_apply, ite_mul, one_mul, zero_mul]
+  simp
+
 theorem expect_mono {p : S → ℝ} (hp : p ∈ Priors S) {a b : S → ℝ} (hab : a ≤ b) :
     expect p a ≤ expect p b :=
   Finset.sum_le_sum fun s _ => mul_le_mul_of_nonneg_left (hab s) (hp.1 s)
+
+/-- prior puts positive mass somewhere, so pointwise strict inequality survives taking
+expectations -/
+theorem exists_pos_of_mem_priors {p : S → ℝ} (hp : p ∈ Priors S) : ∃ s, 0 < p s := by
+  by_contra h
+  push Not at h
+  have hzero : ∑ s, p s = 0 :=
+    Finset.sum_eq_zero fun s _ => le_antisymm (h s) (hp.1 s)
+  rw [hp.2] at hzero
+  exact one_ne_zero hzero
+
+theorem expect_lt_expect {p : S → ℝ} (hp : p ∈ Priors S) {a b : S → ℝ} (hab : ∀ s, a s < b s) :
+    expect p a < expect p b := by
+  obtain ⟨s₀, hs₀⟩ := exists_pos_of_mem_priors hp
+  refine Finset.sum_lt_sum (fun s _ => mul_le_mul_of_nonneg_left (hab s).le (hp.1 s))
+    ⟨s₀, Finset.mem_univ s₀, ?_⟩
+  exact mul_lt_mul_of_pos_left (hab s₀) hs₀
 
 theorem expect_add_const {p : S → ℝ} (hp : p ∈ Priors S) (a : S → ℝ) (c : ℝ) :
     expect p (a + fun _ => c) = expect p a + c := by
